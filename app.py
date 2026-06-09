@@ -64,7 +64,8 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     text = ""
 
-    for page in reader.pages:
+    # for page in reader.pages:
+    for page_number, page in enumerate(reader.pages, start=1):
         text += page.extract_text() or ""
         # print("Pages:", len(reader.pages))
         # print("Characters:", len(text))
@@ -81,7 +82,8 @@ async def upload_pdf(file: UploadFile = File(...)):
                 "metadata": {
                     "document_id": document_id,
                     "text": chunk,
-                    "source": file.filename
+                    "source": file.filename,
+                    "page": page_number,
                 }
             }
         )
@@ -101,6 +103,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 async def query(request: QueryRequest):
     print('request',request)
     question = request.question
+    sources = []
 
     # 1. convert question to vector
     query_vector = model.encode(question).tolist()
@@ -121,8 +124,13 @@ async def query(request: QueryRequest):
 
     for match in results["matches"]:
         context_chunks.append(match["metadata"]["text"])
+        sources.append({
+        "score": match["score"],
+        "text": match["metadata"]["text"][:300]
+    })
 
     context = "\n\n".join(context_chunks)
+    print('context',context)
 
     # 4. build prompt
     final_prompt = prompt.invoke({
@@ -138,7 +146,7 @@ async def query(request: QueryRequest):
     return {
         "question": question,
         "answer": answer.content,
-        "sources": len(context_chunks)
+        "sources": sources
     }
 
 
