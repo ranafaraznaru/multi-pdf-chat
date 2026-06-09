@@ -1,12 +1,15 @@
 import os
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
 from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from app.models.query import QueryRequest
+from app.dependencies import authenicate_user
 
-router = APIRouter(prefix="/query")
+
+router = APIRouter(prefix="/query" , dependencies=[Depends(authenicate_user)])
+
 
 
 pc = Pinecone(

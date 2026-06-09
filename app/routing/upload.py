@@ -2,13 +2,14 @@ import os
 import uuid
 from dotenv import load_dotenv
 from pinecone import Pinecone
-from fastapi import UploadFile, File,APIRouter
+from fastapi import UploadFile, File,APIRouter, Depends
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
+from app.dependencies import authenicate_user
 
 load_dotenv()
-router = APIRouter(prefix="/upload")
+router = APIRouter(prefix="/upload" , dependencies=[Depends(authenicate_user)])
 
 
 pc = Pinecone(
