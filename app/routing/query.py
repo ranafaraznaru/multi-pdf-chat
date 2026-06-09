@@ -1,15 +1,13 @@
 import os
 from fastapi import APIRouter
-from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
 from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from app.models.query import QueryRequest
 
 router = APIRouter(prefix="/query")
 
-
-model = SentenceTransformer("all-MiniLM-L6-v2")
 
 pc = Pinecone(
     api_key=os.getenv("PINECONE_API_KEY")
@@ -24,12 +22,6 @@ llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
     google_api_key=GOOGLE_API_KEY
 )
-
-
-
-class QueryRequest(BaseModel):
-    question: str
-    document_id: str
 
 
 prompt = PromptTemplate(
@@ -47,7 +39,7 @@ prompt = PromptTemplate(
 
 @router.post("")
 async def query(request: QueryRequest):
-    print('request',request)
+    model = SentenceTransformer("all-MiniLM-L6-v2")
     question = request.question
     sources = []
 
@@ -63,8 +55,6 @@ async def query(request: QueryRequest):
         "document_id": request.document_id
     }
     )
-    print('results',results)
-
     # 3. extract text chunks
     context_chunks = []
 
@@ -76,18 +66,15 @@ async def query(request: QueryRequest):
     })
 
     context = "\n\n".join(context_chunks)
-    print('context',context)
 
     # 4. build prompt
     final_prompt = prompt.invoke({
         "context": context,
         "question": question
     })
-    print('final_prompt',final_prompt)
 
     # 5. get answer from LLM
     answer = llm.invoke(final_prompt)
-    print('answer',answer)
 
     return {
         "question": question,

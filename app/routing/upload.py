@@ -11,14 +11,6 @@ load_dotenv()
 router = APIRouter(prefix="/upload")
 
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-
-
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,
-    chunk_overlap=200
-)
-
 pc = Pinecone(
     api_key=os.getenv("PINECONE_API_KEY")
 )
@@ -28,6 +20,15 @@ index = pc.Index("multi-pdf")
 
 @router.post("")
 async def upload_pdf(file: UploadFile = File(...)):
+
+
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+
+
+    splitter = RecursiveCharacterTextSplitter(
+    chunk_size=1000,
+    chunk_overlap=200
+)
     
     reader = PdfReader(file.file)
     document_id = str(uuid.uuid4())
@@ -37,8 +38,6 @@ async def upload_pdf(file: UploadFile = File(...)):
     # for page in reader.pages:
     for page_number, page in enumerate(reader.pages, start=1):
         text += page.extract_text() or ""
-        # print("Pages:", len(reader.pages))
-        # print("Characters:", len(text))
 
     chunks = splitter.split_text(text)
     embeddings = model.encode(chunks)

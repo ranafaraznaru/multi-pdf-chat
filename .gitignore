@@ -1,0 +1,100 @@
+# Byte-compiled / optimized / DLL files
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables
+
+.env
+.env.*
+
+# Python distribution / packaging
+
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+*.egg
+
+# Installer logs
+
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+
+# Jupyter Notebook
+
+.ipynb_checkpoints
+
+# IDE / Editor folders
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# MacOS
+
+.DS_Store
+
+# Logs
+
+*.log
+
+# SQLite databases
+
+*.sqlite3
+*.db
+
+# Streamlit
+
+.streamlit/secrets.toml
+
+# MyPy
+
+.mypy_cache/
+
+# Pyre
+
+.pyre/
+
+# Ruff
+
+.ruff_cache/
+
+# Pytype
+
+.pytype/
+
+# C extensions
+
+*.so
+
+# Temporary files
+
+tmp/
+temp/
