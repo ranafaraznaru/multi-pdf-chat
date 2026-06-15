@@ -9,12 +9,9 @@ from app.database.db import get_db
 from sqlalchemy.orm import Session
 from app.services.chat_service import save_message,get_recent_messages,build_chat_history
 from app.services.embedding_service import embedding_model
+from app.database.schema.message_schema import MessageSchema
 
-
-
-router = APIRouter(prefix="/query" , dependencies=[Depends(authenicate_user)])
-
-
+router = APIRouter(prefix="/chat" , dependencies=[Depends(authenicate_user)])
 
 pc = Pinecone(
     api_key=os.getenv("PINECONE_API_KEY")
@@ -67,15 +64,15 @@ say you don't know.
 )  
 
 
-@router.post("")
-async def query(request: QueryRequest,db: Session = Depends(get_db),user=Depends(authenicate_user)):
+@router.post("/{doc_id}/query")
+async def query(doc_id: int, request: QueryRequest, db: Session = Depends(get_db), user=Depends(authenicate_user)):
     question = request.question
     sources = []
     user_id = user["id"]
 
     save_message(
     db=db,
-    document_id=int(request.document_id),
+    document_id=doc_id,
     user_id=user["id"],
     role="user",
     content=request.question,
@@ -90,7 +87,7 @@ async def query(request: QueryRequest,db: Session = Depends(get_db),user=Depends
         top_k=4,
         include_metadata=True,
         filter={
-        "document_id": request.document_id,
+        "document_id": str(doc_id),
         "user_id":user_id,
     }
     )
@@ -115,7 +112,7 @@ async def query(request: QueryRequest,db: Session = Depends(get_db),user=Depends
     # })
     history_messages = get_recent_messages(
     db=db,
-    document_id=int(request.document_id),
+    document_id=doc_id,
     limit=10
     )
     history = build_chat_history(history_messages)
@@ -129,7 +126,7 @@ async def query(request: QueryRequest,db: Session = Depends(get_db),user=Depends
     answer = llm.invoke(final_prompt)
     save_message(
     db=db,
-    document_id=int(request.document_id),
+    document_id=doc_id,
     user_id=user["id"],
     role="assistant",
     content=answer.content,
@@ -139,4 +136,30 @@ async def query(request: QueryRequest,db: Session = Depends(get_db),user=Depends
         "question": question,
         "answer": answer.content,
         "sources": sources
+    }
+
+
+@router.get("/{doc_id}/history")
+async def get_chat_history(doc_id: int, db: Session = Depends(get_db), user=Depends(authenicate_user)):
+    """Retrieve the chat history for a specific document."""
+    user_id = user["id"]
+
+    # Fetch messages and verify the document belongs to the user
+    messages = (
+        db.query(MessageSchema)
+        .filter(MessageSchema.document_id == doc_id, MessageSchema.user_id == user_id)
+        .order_by(MessageSchema.created_at.asc())
+        .all()
+    )
+
+    return {
+        "document_id": doc_id,
+        "history": [
+            {
+                "role": msg.role,
+                "content": msg.content,
+                "created_at": msg.created_at
+            }
+            for msg in messages
+        ]
     }
