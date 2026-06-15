@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,HTTPException
 from pinecone import Pinecone
 from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.services.chat_service import save_message,get_recent_messages,build_chat_history
 from app.services.embedding_service import embedding_model
 from app.database.schema.message_schema import MessageSchema
+from app.database.schema.document_schema import DocumentSchema
 
 router = APIRouter(prefix="/chat" , dependencies=[Depends(authenicate_user)])
 
@@ -66,6 +67,15 @@ say you don't know.
 
 @router.post("/{doc_id}/query")
 async def query(doc_id: int, request: QueryRequest, db: Session = Depends(get_db), user=Depends(authenicate_user)):
+    # 0. Verify document exists and belongs to the user
+    document = db.query(DocumentSchema).filter(
+        DocumentSchema.id == doc_id,
+        DocumentSchema.user_id == user["id"]
+    ).first()
+
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found or you do not have access to it")
+
     question = request.question
     sources = []
     user_id = user["id"]
