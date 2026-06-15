@@ -1,6 +1,5 @@
 import os
 from fastapi import APIRouter,Depends
-from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
 from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -70,7 +69,6 @@ say you don't know.
 
 @router.post("")
 async def query(request: QueryRequest,db: Session = Depends(get_db),user=Depends(authenicate_user)):
-    model = SentenceTransformer("all-MiniLM-L6-v2")
     question = request.question
     sources = []
     user_id = user["id"]
