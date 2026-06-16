@@ -1,5 +1,5 @@
 export interface Document {
-  id: string;
+  id: string | number;
   file_name: string;
   url: string;
   status: "processing" | "completed" | "failed";

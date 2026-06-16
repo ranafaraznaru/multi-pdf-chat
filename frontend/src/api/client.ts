@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 import { ServerToken } from "@/types/api";
-import { handleApiError } from "@/utils/handleApiError";
+import { handleApiError } from "@/utils/handle-api-error";
 
 export function getUrl() {
   return process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -18,10 +18,6 @@ const logoutUser = () => {
     localStorage.removeItem("pdf_user");
     Cookies.remove("pdf_token");
   }
-};
-
-type PayloadTypes<T> = {
-  [key: string]: T;
 };
 
 const apiClient = axios.create({
@@ -84,9 +80,9 @@ async function makeGetRequest(
   }
 }
 
-async function makePostRequest<T>(
+async function makePostRequest(
   url: string,
-  bodyFormData: PayloadTypes<T> | FormData | string | null,
+  bodyFormData: unknown,
   config: AxiosRequestConfig = {},
   withToken = false,
 ) {

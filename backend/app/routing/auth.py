@@ -6,6 +6,7 @@ from typing import Annotated
 from app.database.schema.user_schema import UserSchema
 from fastapi.responses import JSONResponse
 from app.helper import hashPassword, verifyPassword, createAccessToken
+from app.dependencies import authenicate_user
 
 
 router = APIRouter(prefix="/auth")
@@ -46,3 +47,14 @@ def register(data: Register, db: Annotated[Session, Depends(get_db)]):
     db.refresh(new_user)
 
     return {"message": "User registered successfully", "user": new_user}
+
+
+@router.get("/me")
+def get_me(user=Depends(authenicate_user)):
+    return {
+        "data": {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+        }
+    }

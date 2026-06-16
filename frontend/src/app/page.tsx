@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { VibeInput } from "@/components/VibeInput";
-import { GlassPanel } from "@/components/GlassPanel";
-import { StickyFeatureNav } from "@/components/StickyFeatureNav";
-import { FAQ } from "@/components/FAQ";
-import { Navbar } from "@/components/Navbar";
+import Image from "next/image";
+import { VibeInput } from "@/components/vibe-input";
+import { GlassPanel } from "@/components/glass-panel";
+import { StickyFeatureNav } from "@/components/sticky-feature-nav";
+import { FAQ } from "@/components/faq";
+import { Navbar } from "@/components/navbar";
 import { chatService } from "@/api/services/chat";
 import { ChatResponse } from "@/types";
 
@@ -101,10 +102,13 @@ export default function LandingPage() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-slate-900 opacity-80 z-10" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900 z-20" />
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1451187580450-de86905eB085?q=80&w=2070"
-            className="w-full h-full object-cover"
+            className="object-cover"
             alt="Background"
+            fill
+            priority
+            sizes="100vw"
           />
         </div>
 
@@ -123,7 +127,7 @@ export default function LandingPage() {
             Experience the next generation of document intelligence.
           </div>
 
-          <VibeInput onSend={handleSend} />
+          <VibeInput onSend={handleSend} isLoading={isQuerying} />
 
           {lastResponse && (
             <div className="mt-8 p-6 bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl max-w-2xl text-left animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -226,13 +230,15 @@ export default function LandingPage() {
               className="p-8 rounded-3xl text-left"
             >
               <p className="text-slate-200 text-sm leading-relaxed mb-8 italic">
-                "{t.quote}"
+                &ldquo;{t.quote}&rdquo;
               </p>
               <div className="flex items-center gap-4">
-                <img
+                <Image
                   src={t.avatar}
                   className="w-10 h-10 rounded-full border border-white/20"
                   alt={t.name}
+                  width={40}
+                  height={40}
                 />
                 <div className="flex flex-col">
                   <span className="text-white font-medium text-sm">
@@ -247,7 +253,7 @@ export default function LandingPage() {
       </section>
 
       {/* --- FAQ --- */}
-      <section className="bg-white py-24">
+      <section className="bg-white py-24" id="faq">
         <FAQ items={FAQS} />
       </section>
 
