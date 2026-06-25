@@ -81,10 +81,10 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
         run: |
           # Pull latest image explicitly for the backend service
-          docker compose pull
+          docker-compose pull
 
           # Start the services in detached mode
-          docker compose up -d
+          docker-compose up -d
 
           # Clean up old unused images to save disk space on EC2
           docker image prune -f
